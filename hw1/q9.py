@@ -38,6 +38,9 @@ plaintext2 = "the other decoded message"
 BITS = ('0', '1')
 ASCII_BITS = 7
 
+def enquote(s):
+    return '"' + s + '"'
+
 def is_letter(c):
     o = ord(c)
     return ( o >= 65 and o <= 90 ) or ( o >= 97 and o <= 122 )
@@ -140,24 +143,29 @@ def xor_word_to_bits(lob,word,pos):
     """ xors the bits of a given word with a list of bits """
     assert pos + len(word) <= len(lob)/7
     wbits = string_to_bits(word)
-    return [XOR_bit(lob[pos+i],wbits[i]) for i in range(0,len(word)*7)]
+    return [XOR_bit(lob[pos*7+i],wbits[i]) for i in range(0,len(word)*7)]
 
-def xor_word_bits_sequence(lob,word):
+def xor_word_bits_sequence_display(lob,word,display):
     """ xors the bits of a given word with a list of bits sequentially """
     pos = 0
-    word = word + ' '
+    word = word.title() + ' '
     while pos + len(word) <= len(lob)/7:
-        if pos == 0:
-            word = ' ' + word.title()
         if pos == 1:
-            word = word.lower()
+            word = ' ' + word.lower()
         if pos + len(word) == len(lob)/7:
             word = word[:len(word)-1] + '.'
         decode = bits_to_string(xor_word_to_bits(lob,word,pos))
-        if is_display_str(decode):
-            print "Position: ", pos
+        if display or is_display_str(decode):
+            print "Position:", pos
+            print "Word:", '"' + word + '"'
             print '"' + decode + '"'
             raw_input("Press any key to continue...")
         pos += 1
+
+def xor_word_bits_sequence(lob,word):
+    xor_word_bits_sequence_display(lob,word,False)
+
+def decrypt(string,pos):
+    print '->',enquote(bits_to_string(xor_word_to_bits(C1XORC2,string,pos)))
 
 C1XORC2 = XOR(seq_to_bits(C1),seq_to_bits(C2))
